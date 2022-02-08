@@ -2,37 +2,29 @@ import telebot
 from telebot import types
 import userstats
 import time
+
 TOKEN = "5174930087:AAGoeno-wC93dPb-_z_yCdoHRf_JbqyeZYI"
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 phrases = ["Ты великолепен!!!", "Под твоей клавиатурой находится меню. Пользуйся!!", "Нажми кнопку Трекер чтобы "
                                                                                      "начать решать задачи. Для "
                                                                                      "получения аналитики нажмите "
-                                                                                    "Статистика. Удачи!!!"]
+                                                                                     "Статистика. Удачи!!!"]
 
-def spawn_tracker(stats, call=None,message=None):
+
+def spawn_tracker(stats, call=None, message=None):
+    msg = "Таймер {}. \nВы кодите: {}\nРешено задач: {}".format(
+        "запущен" if stats["timer_state"] else "выключен", time.strftime("%H:%M:%S", time.gmtime(stats["timer_count"])), stats["task_count"])
+    markup = types.InlineKeyboardMarkup()
+    remove_button = types.InlineKeyboardButton("Удалить задачу", callback_data="remove_task")
+    change_task_state_button = types.InlineKeyboardButton(
+        "Закончить решать задачу" if stats["timer_state"] else "Начать решать задачу",
+        callback_data="change_timer_state")
+    update_timer_button = types.InlineKeyboardButton("Обновить таймер", callback_data="update_timer")
+    markup.row(remove_button, change_task_state_button)
+    markup.row(update_timer_button)
     if call is None:
-
-        msg = "Таймер {}. \nВы кодите: {} секунд \nРешено: {} задачи".format(
-            "запущен" if stats["timer_state"] else "выключен", stats["timer_count"], stats["task_count"])
-        markup = types.InlineKeyboardMarkup(row_width=1)
-        remove_button = types.InlineKeyboardButton("Удалить задачу", callback_data="remove_task")
-        change_task_state_button = types.InlineKeyboardButton(
-            "Закончить решать задачу" if stats["timer_state"] else "Начать решать задачу",
-            callback_data="change_timer_state")
-        markup.add(remove_button)
-        markup.add(change_task_state_button)
         bot.send_message(message.chat.id, msg, reply_markup=markup)
     elif message is None:
-
-        msg = "Таймер {}. \nВы кодите: {} секунд \nРешено: {} задачи".format(
-            "запущен" if stats["timer_state"] else "выключен", stats["timer_count"], stats["task_count"])
-        markup = types.InlineKeyboardMarkup(row_width=1)
-        remove_button = types.InlineKeyboardButton("Удалить задачу", callback_data="remove_task")
-        change_task_state_button = types.InlineKeyboardButton(
-            "Закончить решать задачу" if stats["timer_state"] else "Начать решать задачу",
-            callback_data="change_timer_state")
-        markup.add(remove_button)
-        markup.add(change_task_state_button)
         bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id, text=msg,
                               reply_markup=markup)
 
@@ -41,6 +33,8 @@ def spawn_tracker(stats, call=None,message=None):
 def savebot(message):
     bot.send_message(message.chat.id, "Сохраняемся.....")
     userstats.save()
+
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
     # найстройка меню клавиатуры
@@ -50,7 +44,9 @@ def start_message(message):
     markup.row(statistics_button, tracker_button)
     # Приветственные сообщения
     bot.send_message(message.chat.id, phrases[0])
+    time.sleep(1)
     bot.send_message(message.chat.id, phrases[1])
+    time.sleep(1)
     bot.send_message(message.chat.id, phrases[2], reply_markup=markup)
     # Регистрация нового пользователя
     if not userstats.check_user_registration(message.from_user):
@@ -102,6 +98,11 @@ def query_handler(call):
                 userstats.start_timer(call.message.chat)
             userstats.change_task_state(call.message.chat)
             spawn_tracker(stats, call=call)
+        elif call.data == "update_timer":
+            stats = userstats.get_stat_by_id(call.message.chat)
+            if stats["timer_state"]:
+                userstats.update_timer(call.message.chat)
+                spawn_tracker(stats, call=call)
 
 
 try:
