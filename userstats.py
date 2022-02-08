@@ -17,6 +17,7 @@ def update_timer(user):
     if user_stats[str(user.id)]["timer_state"]:
         user_stats[str(user.id)]["timer_count"] += time.time() - user_stats[str(user.id)]["last_time"]
         user_stats[str(user.id)]["last_time"] = time.time()
+
 def start_timer(user):
     user_stats[str(user.id)]["last_time"] = time.time()
 
