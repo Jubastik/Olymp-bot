@@ -40,12 +40,12 @@ def set_user_timer_count(user):
 
 def save():
     serialize_json = json.dumps(user_stats)
-    with open(r"C:\Users\Sis.Admin\PycharmProjects\Oyimp-bot\files\user_stats.json", "w", encoding="utf-8") as f:
+    with open(r"files/user_stats.json", "w", encoding="utf-8") as f:
         f.write(serialize_json)
 
 
 def load():
-    with open(r"C:\Users\Sis.Admin\PycharmProjects\Oyimp-bot\files\user_stats.json", "r", encoding="utf-8") as f:
+    with open(r"files/user_stats.json", "r", encoding="utf-8") as f:
         global user_stats
         user_stats = json.loads(f.read())
 
