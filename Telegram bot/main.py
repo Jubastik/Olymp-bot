@@ -1,19 +1,32 @@
-import telebot
-from telebot import types
-import userstats
 import time
 
+import telebot
+from telebot import types
+
+import userstats
+
 TOKEN = "5174930087:AAGoeno-wC93dPb-_z_yCdoHRf_JbqyeZYI"
+phrases = ["Ты великолепен!!!",
+           "Под твоей клавиатурой находится меню. Пользуйся!!",
+           """Нажми кнопку Трекер чтобы начать решать задачи. Для получения аналитики нажмите Статистика. Удачи!!!"""]
+
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
-phrases = ["Ты великолепен!!!", "Под твоей клавиатурой находится меню. Пользуйся!!", "Нажми кнопку Трекер чтобы "
-                                                                                     "начать решать задачи. Для "
-                                                                                     "получения аналитики нажмите "
-                                                                                     "Статистика. Удачи!!!"]
+
+
+def start_bot():
+    try:
+        userstats.load()
+        bot.polling()
+    except ZeroDivisionError:
+        userstats.save()
+    finally:
+        userstats.save()
 
 
 def spawn_tracker(stats, call=None, message=None):
     msg = "Таймер {}. \nВы кодите: {}\nРешено задач: {}".format(
-        "запущен" if stats["timer_state"] else "выключен", time.strftime("%H:%M:%S", time.gmtime(stats["timer_count"])), stats["task_count"])
+        "запущен" if stats["timer_state"] else "выключен", time.strftime("%H:%M:%S", time.gmtime(stats["timer_count"])),
+        stats["task_count"])
     markup = types.InlineKeyboardMarkup()
     remove_button = types.InlineKeyboardButton("Удалить задачу", callback_data="remove_task")
     change_task_state_button = types.InlineKeyboardButton(
@@ -105,10 +118,5 @@ def query_handler(call):
                 spawn_tracker(stats, call=call)
 
 
-try:
-    userstats.load()
-    bot.polling()
-except ZeroDivisionError:
-    userstats.save()
-finally:
-    userstats.save()
+if __name__ == "__main__":
+    start_bot()
