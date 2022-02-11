@@ -4,6 +4,7 @@ import telebot
 from telebot import types
 
 import userstats
+import tools
 
 TOKEN = "5174930087:AAGoeno-wC93dPb-_z_yCdoHRf_JbqyeZYI"
 phrases = ["Ты великолепен!!!",
@@ -25,7 +26,7 @@ def start_bot():
 
 def spawn_tracker(stats, call=None, message=None):
     msg = "Таймер {}. \nВы кодите: {}\nРешено задач: {}".format(
-        "запущен" if stats["timer_state"] else "выключен", time.strftime("%H:%M:%S", time.gmtime(stats["timer_count"])),
+        "запущен" if stats["timer_state"] else "выключен", time.gmtime(stats["timer_count"]),
         stats["task_count"])
     markup = types.InlineKeyboardMarkup()
     remove_button = types.InlineKeyboardButton("Удалить задачу", callback_data="remove_task")

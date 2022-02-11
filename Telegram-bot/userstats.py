@@ -68,8 +68,7 @@ def get_cur_stat_by_id(user):
     #Получает айди пользователя
     pass
     # Возвращает статы по форме {"task_count": 0, "timer_count": 0, "timer_state": False, "last_time": 0} из таблицы со статами текущего дня
-def get__stat_by_id(user):
-
+def get_stat_by_id(user):
     # Получает айди пользователя а так же список тех параметров, которые нужно вернуть и еще промежуток времени за который нужна статистика
     # (user_id, params = ["task_count","timer_count"], days = 7)
     return user_stats[str(user.id)]
