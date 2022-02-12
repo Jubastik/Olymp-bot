@@ -30,6 +30,15 @@ class Database:
         else:
             return False
 
+    def register_id(self, tg_id=None):
+        cur = self.cur()
+        result = cur.execute(
+            """INSERT INTO users(user_tg, user_cnt) 
+            VALUES(?, 0)""", [tg_id]
+        )
+        self.con.commit()
+        return result.lastrowid
+
     def tgid_to_id(self, tgid):
         cur = self.cur()
         result = cur.execute(
@@ -159,6 +168,18 @@ def finish_contest(platform, id):
     return "success"
 
 
+@app.route('/register_id/<platform>/<int:tg_id>')
+def register_id(platform, tg_id=0):
+    if platform == TG:
+        try:
+            new_id = DB.register_id(tg_id)
+        except sqlite3.IntegrityError:
+            return "tg_id already registered"
+    else:
+        new_id = DB.register_id()
+    return str(new_id)
+
+
 def id_processing(id, platform):
     if platform == TG:
         id = DB.tgid_to_id(id)
@@ -173,5 +194,4 @@ def id_processing(id, platform):
 
 if __name__ == '__main__':
     DB = Database()
-    DB.add_contest_to_tasks(2, 4, 1000)
     app.run(port=8080, host="127.0.0.1", debug=True)
