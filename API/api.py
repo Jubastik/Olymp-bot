@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from datetime import datetime
 
 from flask import Flask, jsonify
 
@@ -40,12 +41,34 @@ class Database:
             result = result[0]
         return result
 
-    def get_start_settings(self):
+    def add_task_to_user(self, id, count):
         cur = self.cur()
         result = cur.execute(
-            """select * from tasks """
-        ).fetchall()
+            """UPDATE users
+            SET user_cnt = user_cnt + ?
+            WHERE id == ?""", [count, id]
+        )
+        self.con.commit()
         return result
+
+    def add_contest_to_tasks(self, id, count, fin_time):
+        current_date = datetime.now().date()
+        cur = self.cur()
+        result = cur.execute(
+            """UPDATE tasks
+            SET task_cnt = task_cnt + ?,
+            task_time = task_time + ?
+            WHERE task_user_id == ? and task_dod == ?""", [count, fin_time, id, current_date]
+        )
+        self.con.commit()
+        if result.rowcount == 1:
+            return True
+        cur = self.cur()
+        result = cur.execute(
+            """INSERT INTO tasks(task_user_id, task_cnt, task_dod, task_time) 
+            VALUES(?, ?, ?, ?)""", [id, count, current_date, fin_time]
+        )
+        return True
 
     def start_new_contest(self, id):
         cur = self.cur()
@@ -55,7 +78,7 @@ class Database:
         )
         self.con.commit()
 
-    def add_task(self, id):
+    def add_task_to_contest(self, id):
         cur = self.cur()
         result = cur.execute(
             """UPDATE contest
@@ -68,13 +91,14 @@ class Database:
     def finish_contest(self, id):
         cur = self.cur()
         result = cur.execute(
-            """select start_time 
+            """select start_time, count
             from contest
             where user_id == ?""", [id]
         ).fetchone()
         if not result:
-            return None
+            return None, None
         fin_time = time.time() - result[0]
+        count = result[1]
 
         cur = self.cur()
         result = cur.execute(
@@ -82,7 +106,7 @@ class Database:
                 where user_id == ?""", [id]
         )
         self.con.commit()
-        return int(fin_time)
+        return int(fin_time), int(count)
 
     def cur(self):
         return self.con.cursor()
@@ -92,7 +116,7 @@ class Database:
 
 
 @app.route('/')
-def hello_world():  # put application's code here
+def hello_world():
     return jsonify(DB.get_start_settings())
 
 
@@ -102,7 +126,6 @@ def start_new_contest(platform, id):
         id = id_processing(id, platform)
     except IDError as e:
         return str(e)
-
     try:
         DB.start_new_contest(id)
         return "success"
@@ -117,7 +140,7 @@ def add_task(platform, id):
     except IDError as e:
         return str(e)
 
-    res = DB.add_task(id)
+    res = DB.add_task_to_contest(id)
     if res.rowcount != 1:
         return "contest has not launched"
     return "success"
@@ -129,6 +152,11 @@ def finish_contest(platform, id):
         id = id_processing(id, platform)
     except IDError as e:
         return str(e)
+    fin_time, count = DB.finish_contest()
+    if fin_time is None:
+        return "contest has not started"
+    DB.add_task_to_user(id, count)
+    return "success"
 
 
 def id_processing(id, platform):
@@ -145,4 +173,5 @@ def id_processing(id, platform):
 
 if __name__ == '__main__':
     DB = Database()
+    DB.add_contest_to_tasks(2, 4, 1000)
     app.run(port=8080, host="127.0.0.1", debug=True)
