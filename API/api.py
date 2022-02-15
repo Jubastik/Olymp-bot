@@ -205,8 +205,7 @@ def finish_contest(platform, id):
     fin_time, count = DB.finish_contest(id)
     if fin_time is None:
         return create_json(False, "contest has not started")
-    time1, count = DB.finish_contest(id)
-    DB.add_contest_to_tasks(id, count, time1)
+    DB.add_contest_to_tasks(id, count, fin_time)
     return create_json(True)
 
 
@@ -282,5 +281,4 @@ def create_json(success, data=None):
 
 if __name__ == '__main__':
     DB = Database()
-    print(DB.get_info_on_date_range(1, "2022-02-12", "2022-02-13"))
     app.run(port=8080, host="127.0.0.1", debug=True)
