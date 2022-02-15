@@ -137,6 +137,17 @@ class Database:
         ).fetchall()
         return result
 
+    def get_contest_info(self, id):
+        cur = self.cur()
+        result = cur.execute(
+            """select count, start_time
+            from contest
+            where user_id == ?""", [id]
+        ).fetchone()
+        fin_time = time.time() - result[1]
+        count = result[0]
+        return [count, fin_time]
+
     def cur(self):
         return self.con.cursor()
 
@@ -196,6 +207,31 @@ def finish_contest(platform, id):
     return create_json(True)
 
 
+@app.route('/get_day_info/<platform>/<int:id>')
+def get_day_info(platform, id=0):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+    cnt = 0
+    time = 0
+    time_state = False
+    res = DB.get_info_on_date_range(id, datetime.now().date(), datetime.now().date())
+    if res:
+        cnt += res[0][0]
+        time += res[0][1]
+    res = DB.get_contest_info(id)
+    if res:
+        time_state = True
+        cnt += res[0]
+        time += res[1]
+    return create_json(True, {
+        "task_count": cnt,
+        "timer_count": time,
+        "timer_state": time_state,
+    })
+
+
 @app.route('/register_id/<platform>/<int:tg_id>')
 def register_id(platform, tg_id=0):
     if platform == TG:
@@ -206,22 +242,6 @@ def register_id(platform, tg_id=0):
     else:
         new_id = DB.register_id()
     return create_json(True, str(new_id))
-
-
-@app.route('/register_id/<platform>/<int:tg_id>')
-def get_day_info(platform, tg_id=0):
-    try:
-        id = id_processing(id, platform)
-    except IDError as e:
-        return create_json(False, str(e))
-    cnt = 0
-    time = 0
-    res = DB.get_info_on_date_range(id, datetime.now().date(), datetime.now().date())
-
-    cnt += res[0][0]
-    time += res[0][1]
-
-
 
 
 def id_processing(id, platform):
