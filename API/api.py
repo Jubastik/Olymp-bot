@@ -144,9 +144,11 @@ class Database:
             from contest
             where user_id == ?""", [id]
         ).fetchone()
-        fin_time = time.time() - result[1]
-        count = result[0]
-        return [count, fin_time]
+        if result:
+            fin_time = time.time() - result[1]
+            count = result[0]
+            return [count, fin_time]
+        return None
 
     def cur(self):
         return self.con.cursor()
@@ -230,6 +232,19 @@ def get_day_info(platform, id=0):
         "timer_count": time,
         "timer_state": time_state,
     })
+
+
+@app.route('/contest_state/<platform>/<int:id>')
+def contest_state(platform, id=0):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+    res = DB.get_contest_info(id)
+    timer_state = False
+    if res:
+        timer_state = True
+    return create_json(True, timer_state)
 
 
 @app.route('/register_id/<platform>/<int:tg_id>')
