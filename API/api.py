@@ -97,6 +97,16 @@ class Database:
         self.con.commit()
         return result
 
+    def del_task_from_contest(self, id):
+        cur = self.cur()
+        result = cur.execute(
+            """UPDATE contest
+            SET count = count - 1
+            WHERE user_id == ?""", [id]
+        )
+        self.con.commit()
+        return result
+
     def finish_contest(self, id):
         cur = self.cur()
         result = cur.execute(
@@ -117,6 +127,16 @@ class Database:
         self.con.commit()
         return int(fin_time), int(count)
 
+    def get_info_on_date_range(self, id, start, finish):
+        cur = self.cur()
+        result = cur.execute(
+            """select task_cnt, task_time, task_dod
+            from tasks
+            where task_user_id == ? and
+            DATE(task_dod) between DATE(?) and DATE(?)""", [id, start, finish]
+        ).fetchall()
+        return result
+
     def cur(self):
         return self.con.cursor()
 
@@ -124,22 +144,17 @@ class Database:
         self.con.close()
 
 
-@app.route('/')
-def hello_world():
-    return jsonify(DB.get_start_settings())
-
-
 @app.route('/start_new_contest/<platform>/<int:id>')
 def start_new_contest(platform, id):
     try:
         id = id_processing(id, platform)
     except IDError as e:
-        return str(e)
+        return create_json(False, str(e))
     try:
         DB.start_new_contest(id)
-        return "success"
+        return create_json(True)
     except sqlite3.IntegrityError:
-        return "user exists"
+        return create_json(False, "user exists")
 
 
 @app.route('/add_task/<platform>/<int:id>')
@@ -147,12 +162,25 @@ def add_task(platform, id):
     try:
         id = id_processing(id, platform)
     except IDError as e:
-        return str(e)
+        return create_json(False, str(e))
 
     res = DB.add_task_to_contest(id)
     if res.rowcount != 1:
-        return "contest has not launched"
-    return "success"
+        return create_json(False, "contest has not launched")
+    return create_json(True)
+
+
+@app.route('/del_task/<platform>/<int:id>')
+def del_task(platform, id):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+
+    res = DB.del_task_from_contest(id)
+    if res.rowcount != 1:
+        return create_json(False, "contest has not launched")
+    return create_json(True)
 
 
 @app.route('/finish_contest/<platform>/<int:id>')
@@ -160,12 +188,12 @@ def finish_contest(platform, id):
     try:
         id = id_processing(id, platform)
     except IDError as e:
-        return str(e)
+        return create_json(False, str(e))
     fin_time, count = DB.finish_contest()
     if fin_time is None:
-        return "contest has not started"
+        return create_json(False, "contest has not started")
     DB.add_task_to_user(id, count)
-    return "success"
+    return create_json(True)
 
 
 @app.route('/register_id/<platform>/<int:tg_id>')
@@ -174,10 +202,26 @@ def register_id(platform, tg_id=0):
         try:
             new_id = DB.register_id(tg_id)
         except sqlite3.IntegrityError:
-            return "tg_id already registered"
+            return create_json(False, "tg_id already registered")
     else:
         new_id = DB.register_id()
-    return str(new_id)
+    return create_json(True, str(new_id))
+
+
+@app.route('/register_id/<platform>/<int:tg_id>')
+def get_day_info(platform, tg_id=0):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+    cnt = 0
+    time = 0
+    res = DB.get_info_on_date_range(id, datetime.now().date(), datetime.now().date())
+
+    cnt += res[0][0]
+    time += res[0][1]
+
+
 
 
 def id_processing(id, platform):
@@ -192,6 +236,15 @@ def id_processing(id, platform):
     return id
 
 
+def create_json(success, data=None):
+    json = {
+        "success": success,  # True, False
+        "data": data,  # ошибка или ответ
+    }
+    return jsonify(json)
+
+
 if __name__ == '__main__':
     DB = Database()
+    print(DB.get_info_on_date_range(1, "2022-02-12", "2022-02-13"))
     app.run(port=8080, host="127.0.0.1", debug=True)
