@@ -125,7 +125,7 @@ class Database:
                 where user_id == ?""", [id]
         )
         self.con.commit()
-        return int(fin_time), int(count)
+        return [int(fin_time), int(count)]
 
     def get_info_on_date_range(self, id, start, finish):
         cur = self.cur()
@@ -202,10 +202,11 @@ def finish_contest(platform, id):
         id = id_processing(id, platform)
     except IDError as e:
         return create_json(False, str(e))
-    fin_time, count = DB.finish_contest()
+    fin_time, count = DB.finish_contest(id)
     if fin_time is None:
         return create_json(False, "contest has not started")
-    DB.add_task_to_user(id, count)
+    time1, count = DB.finish_contest(id)
+    DB.add_contest_to_tasks(id, count, time1)
     return create_json(True)
 
 
