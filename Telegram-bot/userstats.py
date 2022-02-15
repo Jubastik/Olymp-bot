@@ -19,15 +19,15 @@ def increase_user_task_count(user):
     # Устанавливает task_count в значение task_count + 1
 
 def update_timer(user):
-    #Не метод api
+    # Получает айди пользователя
     if user_stats[str(user.id)]["timer_state"]:
         user_stats[str(user.id)]["timer_count"] += time.time() - user_stats[str(user.id)]["last_time"]
         user_stats[str(user.id)]["last_time"] = time.time()
-
+    # Обновляет timer_count в бд и возвращает его новое значение
 def start_timer(user):
     # Получает айди пользователя и time.time()
     user_stats[str(user.id)]["last_time"] = time.time()
-    #Устанавливает в last_time значение time.time()
+    # Устанавливает в last_time значение time.time()
 def decrease_user_task_count(user):
     #Получает айди юзера
     if user_stats[str(user.id)]["task_count"] > 0:
@@ -38,9 +38,11 @@ def decrease_user_task_count(user):
     # Уменьшает task_count Пользователя на 1
 
 
-def change_task_state(user):
+def change_timer_state(user):
     # Получает айди юзера
     user_id = str(user.id)
+    if not user_stats[user_id]["timer_state"]:
+        user_stats[user_id]["last_time"] = time.time()
     user_stats[user_id]["timer_state"] = not user_stats[user_id]["timer_state"]
     # Устанавливает новый timer_state
 
