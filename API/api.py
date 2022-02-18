@@ -77,6 +77,8 @@ class Database:
             """INSERT INTO tasks(task_user_id, task_cnt, task_dod, task_time) 
             VALUES(?, ?, ?, ?)""", [id, count, current_date, fin_time]
         )
+        self.con.commit()
+        print(result)
         return True
 
     def start_new_contest(self, id):

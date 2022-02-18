@@ -3,17 +3,19 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 import api_interface as api
 import tools
-from config import TOKEN, PHRASES
+from config import TOKEN, PHRASES,PATH_TO_PHOTOS
+import os
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(TOKEN)
 dp = Dispatcher(bot)
 
+
 def start_bot():
     executor.start_polling(dp)
 
 
-async def spawn_tracker(message: types.Message,edit=False):
+async def spawn_tracker(message: types.Message, edit=False):
     stats = api.get_day_stat_by_id(message.chat.id)
     msg = "Таймер {}. \nВы кодите: {}\nРешено задач: {}".format(
         "запущен" if stats["timer_state"] else "выключен", tools.new_time_format(time.gmtime(stats["timer_count"])),
@@ -59,8 +61,6 @@ async def start_message(message: types.Message):
     # Регистрация нового пользователя
 
 
-
-
 @dp.message_handler(content_types='text')
 async def message_reply(message: types.Message):
     # Обработка кнопок
@@ -81,7 +81,23 @@ async def message_reply(message: types.Message):
         await message.answer(PHRASES[2], reply_markup=markup)
     elif message.text == "Трекер":
         # Призыв трекера
-        await spawn_tracker(message=message,edit=False)
+        await spawn_tracker(message=message, edit=False)
+    elif message.text == "По кол-ву":
+        if tools.create_plot(plot_type="task", period=1, count=1, user_id=message.chat.id):
+            photo = open("files/photos/{}.png".format(message.chat.id), "rb")
+            await message.answer_photo(photo)
+            photo.close()
+            os.remove(PATH_TO_PHOTOS + "{}.png".format(message.chat.id))
+        else:
+            await message.answer("Что-то пошло не так, пожалуйста, попробуйте снова!")
+    elif message.text == "По времени":
+        if tools.create_plot(plot_type="time", period=1, count=1, user_id=message.chat.id):
+            photo = open(PATH_TO_PHOTOS+"{}.png".format(message.chat.id), "rb")
+            await message.answer_photo(photo)
+            photo.close()
+            os.remove("files/photos/{}.png".format(message.chat.id))
+        else:
+            await message.answer("Что-то пошло не так, пожалуйста, попробуйте снова!")
 
 
 @dp.callback_query_handler(lambda m: True)
