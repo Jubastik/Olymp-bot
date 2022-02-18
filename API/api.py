@@ -70,7 +70,7 @@ class Database:
             WHERE task_user_id == ? and task_dod == ?""", [count, fin_time, id, current_date]
         )
         self.con.commit()
-        if result.rowcount == 1:
+        if result.connection.total_changes != 0:
             return True
         cur = self.cur()
         result = cur.execute(
@@ -180,7 +180,7 @@ def add_task(platform, id):
         return create_json(False, str(e))
 
     res = DB.add_task_to_contest(id)
-    if res.rowcount != 1:
+    if res.connection.total_changes != 0:
         return create_json(False, "contest has not launched")
     return create_json(True)
 
