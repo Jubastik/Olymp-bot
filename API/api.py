@@ -249,6 +249,21 @@ def contest_state(platform, id=0):
     return create_json(True, timer_state)
 
 
+@app.route('/get_info/<platform>/<int:id>/<start>/<finish>')
+def get_info(platform, id, start, finish):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+    res = DB.get_info_on_date_range(id, start, finish)
+    ans = dict()
+    if len(res) == 0:
+        return create_json(False)
+    for date in res:
+        ans[date[2]] = {"task_count": date[0], "timer_count": date[1]}
+    return create_json(True, ans)
+
+
 @app.route('/register_id/<platform>/<int:tg_id>')
 def register_id(platform, tg_id=0):
     if platform == TG:
