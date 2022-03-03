@@ -1,4 +1,4 @@
-TOKEN = "5174930087:AAGoeno-wC93dPb-_z_yCdoHRf_JbqyeZYI"
+TOKEN = "5211206700:AAHKTGmGaUVihCIvLc8kazBn2XkNY38Ypb0"
 SERVER_PATH = "http://127.0.0.1:8080/"
 PHRASES = ["Ты великолепен!!!",
            "Под твоей клавиатурой находится меню. Пользуйся!!",

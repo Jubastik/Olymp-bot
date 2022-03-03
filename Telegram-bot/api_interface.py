@@ -55,9 +55,12 @@ def stop_timer(user_id):
 def get_timer_state(user_id):
     query = "contest_state/telegram/{}".format(user_id)
     res = requests.get(SERVER_PATH + query)
-
     return json.loads(res.text)["data"]
 
+def get_user_main_stat(user_id):
+    query = "/telegram/{}".format(user_id)
+    res = requests.get(SERVER_PATH + query)
+    return json.loads(res.text)["data"]
 
 def decrease_user_task_count(user_id):
     # Получает айди юзера
@@ -105,13 +108,13 @@ def get_day_stat_by_id(user_id):
     res = json.loads(res.text)
     return res["data"]
     # Возвращает статы по форме {"task_count": 0, "timer_count": 0, "timer_state": False, "last_time": 0} из таблицы со статами текущего дня
-
+    #{"date" : { "task_count" : 0, "timer_count":0}, ... "date" : {"task_count" : 0, "timer_count":0}}
 
 def get_stat_by_id(user_id, days):
     end = datetime.now().date()
     start = end - timedelta(days=days)
     query = "get_info/telegram/{}/{}/{}".format(user_id, start, end)
     res = requests.get(SERVER_PATH + query)
+    print(res.text)
     res = json.loads(res.text)
-    print(res["data"])
     return res["data"]

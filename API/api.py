@@ -257,8 +257,6 @@ def get_info(platform, id, start, finish):
         return create_json(False, str(e))
     res = DB.get_info_on_date_range(id, start, finish)
     ans = dict()
-    if len(res) == 0:
-        return create_json(False)
     for date in res:
         ans[date[2]] = {"task_count": date[0], "timer_count": date[1]}
     return create_json(True, ans)
