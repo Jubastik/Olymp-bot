@@ -33,8 +33,8 @@ class Database:
     def register_id(self, tg_id=None):
         cur = self.cur()
         result = cur.execute(
-            """INSERT INTO users(user_tg, user_cnt) 
-            VALUES(?, 0)""", [tg_id]
+            """INSERT INTO users(user_tg, user_cnt, user_time) 
+            VALUES(?, 0, 0)""", [tg_id]
         )
         self.con.commit()
         return result.lastrowid
@@ -50,12 +50,13 @@ class Database:
             result = result[0]
         return result
 
-    def add_task_to_user(self, id, count):
+    def add_contest_to_user(self, id, count, fin_time):
         cur = self.cur()
         result = cur.execute(
             """UPDATE users
-            SET user_cnt = user_cnt + ?
-            WHERE id == ?""", [count, id]
+            SET user_cnt = user_cnt + ?,
+            user_time = user_time + ?
+            WHERE id == ?""", [count, fin_time, id]
         )
         self.con.commit()
         return result
@@ -70,7 +71,7 @@ class Database:
             WHERE task_user_id == ? and task_dod == ?""", [count, fin_time, id, current_date]
         )
         self.con.commit()
-        if result.connection.total_changes != 0:
+        if result.rowcount == 1:
             return True
         cur = self.cur()
         result = cur.execute(
@@ -78,7 +79,6 @@ class Database:
             VALUES(?, ?, ?, ?)""", [id, count, current_date, fin_time]
         )
         self.con.commit()
-        print(result)
         return True
 
     def start_new_contest(self, id):
@@ -152,6 +152,15 @@ class Database:
             return [count, fin_time]
         return None
 
+    def get_total_info(self, id):
+        cur = self.cur()
+        result = cur.execute(
+            """select user_cnt, user_time
+            from users
+            where id == ?""", [id]
+        ).fetchone()
+        return result
+
     def cur(self):
         return self.con.cursor()
 
@@ -180,7 +189,7 @@ def add_task(platform, id):
         return create_json(False, str(e))
 
     res = DB.add_task_to_contest(id)
-    if res.connection.total_changes != 0:
+    if res.rowcount != 1:
         return create_json(False, "contest has not launched")
     return create_json(True)
 
@@ -208,6 +217,7 @@ def finish_contest(platform, id):
     if fin_time is None:
         return create_json(False, "contest has not started")
     DB.add_contest_to_tasks(id, count, fin_time)
+    DB.add_contest_to_user(id, count, fin_time)
     return create_json(True)
 
 
@@ -259,6 +269,19 @@ def get_info(platform, id, start, finish):
     ans = dict()
     for date in res:
         ans[date[2]] = {"task_count": date[0], "timer_count": date[1]}
+    return create_json(True, ans)
+
+@app.route('/get_total_info/<platform>/<int:id>')
+def get_total_info(platform, id):
+    try:
+        id = id_processing(id, platform)
+    except IDError as e:
+        return create_json(False, str(e))
+    res = DB.get_total_info(id)
+    ans = {
+        "count": res[0],
+        "time": res[1]
+    }
     return create_json(True, ans)
 
 
