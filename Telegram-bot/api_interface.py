@@ -25,7 +25,11 @@ def increase_user_task_count(user_id):
     # Получает айди пользователя
     query = "add_task/telegram/{}".format(user_id)
     res = requests.get(SERVER_PATH + query)
-    return res
+    res = json.loads(res.text)
+    if not res["success"]:
+        return False
+    else:
+        return True
     # Устанавливает task_count в значение task_count + 1
 
 
@@ -58,7 +62,7 @@ def get_timer_state(user_id):
     return json.loads(res.text)["data"]
 
 def get_user_main_stat(user_id):
-    query = "/telegram/{}".format(user_id)
+    query = "get_total_info/telegram/{}".format(user_id)
     res = requests.get(SERVER_PATH + query)
     return json.loads(res.text)["data"]
 
@@ -66,7 +70,11 @@ def decrease_user_task_count(user_id):
     # Получает айди юзера
     query = "del_task/telegram/{}".format(user_id)
     res = requests.get(SERVER_PATH + query)
-    return res
+    res = json.loads(res.text)
+    if not res["success"]:
+        return False
+    else:
+        return True
     # Уменьшает task_count Пользователя на 1
 
 
@@ -106,6 +114,7 @@ def get_day_stat_by_id(user_id):
     query = "get_day_info/telegram/{}".format(user_id)
     res = requests.get(SERVER_PATH + query)
     res = json.loads(res.text)
+
     return res["data"]
     # Возвращает статы по форме {"task_count": 0, "timer_count": 0, "timer_state": False, "last_time": 0} из таблицы со статами текущего дня
     #{"date" : { "task_count" : 0, "timer_count":0}, ... "date" : {"task_count" : 0, "timer_count":0}}

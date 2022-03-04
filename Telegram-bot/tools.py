@@ -8,6 +8,16 @@ from config import PATH_TO_PHOTOS
 
 def new_time_format(time_obj):
     msg = ""
+    if time_obj.tm_yday - 1 > 0 :
+        msg += str(time_obj.tm_yday - 1) + " "
+        if time_obj.tm_yday - 1 in [11, 12, 13, 14]:
+            msg += "дней "
+        elif (time_obj.tm_yday- 1) % 10 == 1:
+            msg += "день "
+        elif (time_obj.tm_yday-1) % 10 in [2, 3, 4]:
+            msg += "дня "
+        elif (time_obj.tm_yday-1) % 10 in [5, 6, 7, 8, 9, 0]:
+            msg += "дней "
     if time_obj.tm_hour > 0:
         msg += str(time_obj.tm_hour) + " "
         if time_obj.tm_hour in [11, 12, 13, 14]:
