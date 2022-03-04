@@ -1,4 +1,6 @@
 flask==2.0.2
 
 aiogram~=2.19
-requests~=2.27.1
+requests~=2.25.1
+gevent~=21.12.0
+matplotlib~=3.5.1
