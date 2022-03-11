@@ -210,9 +210,9 @@ async def query_handler(call: types.CallbackQuery):
         elif call.data == "make_one_week_task_plot":
             if tools.create_plot(plot_type="task", period=1, count=7, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
-                msg = call.message
+                await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id,reply_markup=call.message.reply_markup)
                 await call.message.delete()
-                await msg.copy_to(call.message.chat.id)
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
@@ -221,6 +221,8 @@ async def query_handler(call: types.CallbackQuery):
             if tools.create_plot(plot_type="time", period=1, count=7, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
@@ -229,6 +231,8 @@ async def query_handler(call: types.CallbackQuery):
             if tools.create_plot(plot_type="task", period=1, count=14, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
@@ -237,6 +241,8 @@ async def query_handler(call: types.CallbackQuery):
             if tools.create_plot(plot_type="time", period=1, count=14, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
@@ -245,14 +251,18 @@ async def query_handler(call: types.CallbackQuery):
             if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так, попробуйте снова!")
         elif call.data == "make_one_moth_time_plot":
-            if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
+            if tools.create_plot(plot_type="time", period=7, count=5, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
@@ -261,46 +271,58 @@ async def query_handler(call: types.CallbackQuery):
             if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так попробуйте снова!")
-        elif call.data == "make_three_moth_time_plot":
+        elif call.data == "make_three_month_time_plot":
             if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так попробуйте снова!")
         elif call.data == "make_six_month_task_plot":
-            if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
+            if tools.create_plot(plot_type="task", period=31, count=6, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так попробуйте снова!")
-        elif call.data == "make_six_moth_time_plot":
-            if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
+        elif call.data == "make_six_month_time_plot":
+            if tools.create_plot(plot_type="time", period=31, count=6, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так попробуйте снова!")
         elif call.data == "make_one_year_task_plot":
-            if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
+            if tools.create_plot(plot_type="task", period=31, count=12, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
                 await call.message.answer("Извините, что-то пошло не так попробуйте снова!")
         elif call.data == "make_one_year_time_plot":
-            if tools.create_plot(plot_type="task", period=7, count=5, user_id=call.message.chat.id):
+            if tools.create_plot(plot_type="time", period=31, count=12, user_id=call.message.chat.id):
                 photo = open(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id), "rb")
                 await call.message.answer_photo(photo)
+                await call.message.copy_to(call.message.chat.id, reply_markup=call.message.reply_markup)
+                await call.message.delete()
                 photo.close()
                 os.remove(PATH_TO_PHOTOS + "{}.png".format(call.message.chat.id))
             else:
